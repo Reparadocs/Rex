@@ -1,9 +1,9 @@
-public class RexToken
+public class Token
 {
    private String data;
-   private RexTokenType type;
+   private TokenType type;
 
-   public RexToken(String data, RexTokenType type)
+   public Token(String data, TokenType type)
    {
       this.data = data;
       this.type = type;
@@ -14,7 +14,7 @@ public class RexToken
       return data;
    }
 
-   public RexTokenType getType()
+   public TokenType getType()
    {
       return type;
    }

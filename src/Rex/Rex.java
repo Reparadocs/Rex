@@ -7,8 +7,8 @@ public class Rex
    public static void main(String[] args)
    {
       Scanner scanner;
-      RexLexer lexer;
-      RexParser parser;
+      Lexer lexer;
+      Parser parser;
 
       if(args.length > 1)
       {
@@ -36,8 +36,8 @@ public class Rex
          System.out.println("Rex Initialized");
       }
 
-      parser = new RexParser();
-      lexer = new RexLexer(scanner, parser);
+      parser = new Parser();
+      lexer = new Lexer(scanner, parser);
       lexer.Start();
    }
 }

@@ -1,4 +1,4 @@
-public enum RexTokenType
+public enum TokenType
 {
    INTEGER,
    END,
@@ -14,18 +14,19 @@ public enum RexTokenType
 
    private Integer precedence;
 
-   RexTokenType()
+   TokenType()
    {
       this.precedence = -1;
    }
 
-   RexTokenType(int precedence)
+   TokenType(int precedence)
    {
       this.precedence = precedence;
    }
 
-   public boolean isLessThan(RexTokenType other)
+   public boolean isLessThan(TokenType other)
    {
-      return this.precedence < other.precedence;
+      return this.precedence > other.precedence
+         && other.precedence > 0;
    }
 }

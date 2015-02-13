@@ -3,7 +3,9 @@
    <target name="compile">
       <mkdir dir = "build/classes"/>
       <javac srcdir="src"
-            destdir="build/classes"/>
+            destdir="build/classes"
+            debug="true"
+            debuglevel="lines,vars,source" />
    </target>
 
    <target name="jar">
