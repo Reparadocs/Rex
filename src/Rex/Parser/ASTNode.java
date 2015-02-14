@@ -1,5 +1,6 @@
 import java.lang.IllegalArgumentException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public abstract class ASTNode
@@ -8,14 +9,14 @@ public abstract class ASTNode
 
    public final int numChildren;
 
-   protected ASTNode(List<ASTNode> children, int numChildren)
+   protected ASTNode(LinkedList<ASTNode> expressionStack, int numChildren)
    {
-      if(numChildren != 0 && children.size() != numChildren)
+      children = new ArrayList<ASTNode>();
+      for(int i = 0; i < numChildren; i++)
       {
-         throw new IllegalArgumentException("Wrong number of children");
+         children.add(expressionStack.pop());
       }
       this.numChildren = numChildren;
-      this.children = children;
    }
 
    protected List<Object> handleChildren()

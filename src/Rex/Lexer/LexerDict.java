@@ -1,45 +1,49 @@
 import java.util.regex.Pattern;
-import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.Map;
+import java.util.LinkedHashMap;
+import java.util.ArrayList;
 
 public class LexerDict
 {
-   private HashMap<Pattern, TokenType> tokenMap;
+   private Map<Pattern, TokenType> tokenMap;
 
    public LexerDict()
    {
-      tokenMap = new HashMap<Pattern, TokenType>();
+      tokenMap = new LinkedHashMap<Pattern, TokenType>();
       createDict();
    }
 
    private void createDict()
    {
-      addToken("[0-9]+", TokenType.INTEGER);
-      addToken(";", TokenType.END);
+      addPattern("[0-9]+", TokenType.INTEGER);
+      addPattern(";", TokenType.END);
 
-      addToken("\\(", TokenType.L_PAREN);
-      addToken("\\)", TokenType.R_PAREN);
-      addToken("\\*", TokenType.MLT_OPERATOR);
-      addToken("/", TokenType.DIV_OPERATOR);
-      addToken("%", TokenType.MOD_OPERATOR);
-      addToken("\\+", TokenType.ADD_OPERATOR);
-      addToken("\\-", TokenType.SUB_OPERATOR);
+      addPattern("\\(", TokenType.L_PAREN);
+      addPattern("\\)", TokenType.R_PAREN);
+      addPattern("\\*", TokenType.MLT_OPERATOR);
+      addPattern("/", TokenType.DIV_OPERATOR);
+      addPattern("%", TokenType.MOD_OPERATOR);
+      addPattern("\\+", TokenType.ADD_OPERATOR);
+      addPattern("\\-", TokenType.SUB_OPERATOR);
    }
 
-   private void addToken(String regex, TokenType tokenType)
+   private void addPattern(String regex, TokenType type)
    {
-      tokenMap.put(Pattern.compile("^" + regex + "$"), tokenType);
+      tokenMap.put(Pattern.compile("^(" + regex + ")(.*)$"), type);
    }
 
-   public TokenType match(String token)
+   public TokenMatcher match(String token)
    {
       for(Pattern pattern : tokenMap.keySet())
       {
-         if(pattern.matcher(token).find())
+         Matcher match = pattern.matcher(token);
+         if(match.find())
          {
-            return tokenMap.get(pattern);
+            return new TokenMatcher(match, tokenMap.get(pattern));
          }
       }
-      return TokenType.NONE;
+      return null;
    }
 
 }

@@ -1,11 +1,12 @@
 import java.util.Scanner;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
 
 public class Lexer
 {
-   Scanner scanner;
-   Parser parser;
-   LexerDict tokenDict;
+   private Scanner scanner;
+   private Parser parser;
+   private LexerDict tokenDict;
 
    public Lexer(Scanner scanner, Parser parser)
    {
@@ -21,21 +22,26 @@ public class Lexer
       while(scanner.hasNext())
       {
          String tokenData = scanner.next();
-         TokenType tokenType = tokenDict.match(tokenData);
-         if(tokenType == TokenType.NONE)
-         {
-            System.out.println("Syntax Error: " + tokenData);
-            return;
-         }
 
-         if(tokenType == TokenType.END)
+         while(tokenData.length() != 0)
          {
-            parser.parse(curPhrase);
-            curPhrase = new ArrayList<Token>();
-         }
-         else
-         {
-            curPhrase.add(new Token(tokenData, tokenType));
+            TokenMatcher tokenMatcher = tokenDict.match(tokenData);
+            if(tokenMatcher == null)
+            {
+               ErrorHandler.handle("Syntax Error:" + tokenData);
+            }
+
+            tokenData = tokenMatcher.getMatcher().group(2);
+            if(tokenMatcher.getType() == TokenType.END)
+            {
+               parser.parse(curPhrase);
+               curPhrase = new ArrayList<Token>();
+            }
+            else
+            {
+               curPhrase.add(new Token(tokenMatcher.getMatcher().group(1), 
+                  tokenMatcher.getType()));
+            }
          }
       }
    }

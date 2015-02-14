@@ -5,16 +5,18 @@ import java.util.LinkedList;
 public class SyntaxTree
 {
    ASTNode root;
+   LinkedList<TokenType> operatorStack;
+   LinkedList<ASTNode> expressionStack;
 
    public SyntaxTree(List<Token> tokens)
    {
+      operatorStack = new LinkedList<TokenType>();
+      expressionStack = new LinkedList<ASTNode>();
       this.root = buildTree(tokens);
    }
 
    private ASTNode buildTree(List<Token> tokens)
    {
-      LinkedList<TokenType> operatorStack = new LinkedList<TokenType>();
-      LinkedList<ASTNode> expressionStack = new LinkedList<ASTNode>();
       for(Token t : tokens)
       {
          switch(t.getType())
@@ -27,17 +29,14 @@ public class SyntaxTree
                operatorStack.push(TokenType.L_PAREN);
                break;
             case R_PAREN:
-               while(operatorStack.peek() != TokenType.L_PAREN)
+               while(!operatorStack.isEmpty() && operatorStack.peek() != TokenType.L_PAREN)
                {
-                  TokenType op = operatorStack.pop();
-                  expressionStack.push(new BinaryOpNode(
-                     Arrays.asList(expressionStack.pop(),
-                     expressionStack.pop()),op));
+                  createBinOpNode();
                }
 
                if(operatorStack.isEmpty())
                {
-                  throw new IllegalArgumentException("No closing parentheses");
+                  ErrorHandler.handle("No opening parentheses");
                }
 
                operatorStack.pop();
@@ -47,33 +46,27 @@ public class SyntaxTree
             case MOD_OPERATOR:
             case ADD_OPERATOR:
             case SUB_OPERATOR:
-               while(!operatorStack.isEmpty() &&
-                  t.getType().isLessThan(operatorStack.peek()))
+               while(!operatorStack.isEmpty() && t.getType().isLessThan(operatorStack.peek()))
                   {
-                     TokenType op = operatorStack.pop();
-                     expressionStack.push(new BinaryOpNode(
-                     Arrays.asList(expressionStack.pop(),
-                     expressionStack.pop()),op));
+                     createBinOpNode();
                   }
                operatorStack.push(t.getType());
                break;
          }
       }
 
-      /* Something's going to go horribly wrong here */
       while(!operatorStack.isEmpty())
       {
-         TokenType op = operatorStack.pop();
-         expressionStack.push(new BinaryOpNode(
-            Arrays.asList(expressionStack.pop(),
-            expressionStack.pop()),op));
+         if(operatorStack.peek() == TokenType.L_PAREN)
+         {
+            ErrorHandler.handle("No closing parentheses");
+         }
+         createBinOpNode();
       }
 
       if(expressionStack.size() != 1)
       {
-         while(!expressionStack.isEmpty())
-            System.out.println(expressionStack.pop().getClass());
-         throw new RuntimeException("Something went wrong when building the tree.");
+         ErrorHandler.handle("Couldn't build the tree properly, more than one root");
       }
 
       return expressionStack.pop();
@@ -82,5 +75,19 @@ public class SyntaxTree
    public Object execute()
    {
       return root.handle();
+   }
+
+   private void createBinOpNode()
+   {
+      if(expressionStack.size() < 2)
+      {
+         ErrorHandler.handle("Tried to create BinOpNode, less than 2 operands");
+      }
+      if(operatorStack.isEmpty())
+      {
+         ErrorHandler.handle("Tried to create BinOpNode, no operator");
+      }
+      TokenType op = operatorStack.pop();
+      expressionStack.push(new BinaryOpNode(expressionStack, op));
    }
 }

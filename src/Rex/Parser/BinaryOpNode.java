@@ -1,6 +1,7 @@
 import java.util.NoSuchElementException;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class BinaryOpNode extends ASTNode
 {
@@ -8,21 +9,17 @@ public class BinaryOpNode extends ASTNode
 
    private TokenType operator;
 
-   public BinaryOpNode(List<ASTNode> children, TokenType operator)
-   {      
-      super(children, NUM_CHILDREN);
+   public BinaryOpNode(LinkedList<ASTNode> expressionStack, TokenType operator)
+   {
+      super(expressionStack, NUM_CHILDREN);
       this.operator = operator;
    }
 
-   /* This is a bad way of translating Objects to Ints */
    public Object handle()
    {
-      List<Object> objResults = handleChildren();
-      List<Integer> results = new ArrayList<Integer>();
-      for(Object o : objResults)
-      {
-         results.add((Integer)o);
-      }
+      //Temporary till we get more types
+      List<Integer> results = 
+         BinaryOpNode.<Integer>handleChildrenInt(this.children);
       
       switch(operator)
       {
@@ -38,7 +35,19 @@ public class BinaryOpNode extends ASTNode
          case SUB_OPERATOR:
             return results.get(0) - results.get(1);
          default:
-            throw new NoSuchElementException();
+            ErrorHandler.handle("Not a binary operator");
+            return null;
       }
    }
+
+   private static <T> List<T> handleGenericChildren(List<ASTNode> children)
+   {
+      ArrayList<T> results = new ArrayList<T>();
+      for(int i = children.size()-1; i >= 0; i--)
+      {
+         results.add((T)(children.get(i).handle()));
+      }
+      return results;
+   }
+
 }
